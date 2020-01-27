@@ -2,22 +2,22 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:orientation="vertical">
 
     <TextView
-        android:id="@+id/et_dialog_create_doc_title"
+        android:id="@+id/et_dialog_create_page_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="22sp"
         android:background="@color/colorPrimary"
-        android:text="Create Doc"
+        android:text="Create Page"
         android:padding="8dp"
         android:layout_gravity="center"
         android:gravity="center"/>
 
     <EditText
-        android:id="@+id/et_create_doc_name"
+        android:id="@+id/et_create_page_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="start"
@@ -36,7 +36,7 @@
         android:layout_marginBottom="4dp">
 
         <Button
-            android:id="@+id/b_dialog_create_doc_save"
+            android:id="@+id/b_dialog_create_page_save"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="SAVE"
@@ -46,7 +46,7 @@
             android:onClick="onClickSaveJob"/>
 
         <Button
-            android:id="@+id/b_dialog_create_doc_close"
+            android:id="@+id/b_dialog_create_page_close"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="DISCARD"

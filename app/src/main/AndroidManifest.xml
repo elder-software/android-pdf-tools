@@ -3,16 +3,13 @@
     package="com.eldersoftware.pdfassist">
 
     <application
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <provider
-            android:name=".data.DocInfoProvider"
-            android:authorities="com.eldersoftware.pdfassist"
-            android:exported="false" />
+        <activity android:name=".DocPagesActivity"></activity>
 
         <activity android:name=".AllDocsActivity">
             <intent-filter>
@@ -21,6 +18,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <provider
+            android:name=".data.DocInfoProvider"
+            android:authorities="com.eldersoftware.pdfassist"
+            android:exported="false" />
     </application>
 
 </manifest>

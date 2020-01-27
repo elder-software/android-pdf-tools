@@ -27,8 +27,8 @@ public class DocInfoProvider extends ContentProvider {
                 DocInfoContract.PATH_DOC_INFO_NAME,
                 DOC_INFO);
 
-        //For accessing the jobinfo table. Only the jobname is needed to access a single row
-        //Will have the format content://authority/jobname
+        //For accessing the docinfo table. Only the jobname is needed to access a single row
+        //Will have the format content://authority/docname
         uriMatcher.addURI(DocInfoContract.AUTHORITY,
                 DocInfoContract.PATH_DOC_INFO_NAME + "/*",
                 DOC_INFO_WITH_NAME);
@@ -47,6 +47,15 @@ public class DocInfoProvider extends ContentProvider {
         return true;
     }
 
+    /**
+     * To make queries to the content provider
+     * @param uri - uri
+     * @param projection - projection
+     * @param selection - selection
+     * @param selectionArgs - selectionArgs
+     * @param sortOrder - sortOrder
+     * @return - Cursor containing the queried data
+     */
     @Nullable
     @Override
     public Cursor query(@NonNull Uri uri,
@@ -58,7 +67,7 @@ public class DocInfoProvider extends ContentProvider {
 
         switch (sUriMatcher.match(uri)) {
             case DOC_INFO: {
-                //For general queries to the JobInfo Db
+                //For general queries to the DocInfo Db
                 cursor = mOpenHelper.getReadableDatabase().query(
                         DocInfoContract.DocInfoListEntry.TABLE_NAME,
                         projection,
@@ -73,8 +82,7 @@ public class DocInfoProvider extends ContentProvider {
 
             case DOC_INFO_WITH_NAME: {
                 //The last path segment has been confirmed as a string type, and assumed to be
-                //the doc name, returning the row matching with the job name
-
+                //the doc name, returning the row matching with the doc name
                 String[] jobNameSelectionArg = {uri.getLastPathSegment()};
 
                 cursor = mOpenHelper.getReadableDatabase().query(
@@ -103,6 +111,12 @@ public class DocInfoProvider extends ContentProvider {
         return null;
     }
 
+    /**
+     * Inserts new rows into the content provider
+     * @param uri - uri
+     * @param values - values
+     * @return null
+     */
     @Nullable
     @Override
     public Uri insert(@NonNull Uri uri, @Nullable ContentValues values) {
@@ -124,6 +138,13 @@ public class DocInfoProvider extends ContentProvider {
         return null;
     }
 
+    /**
+     * Deletes rows matching the selection criteria
+     * @param uri - uri
+     * @param selection - selection
+     * @param selectionArgs - selectionArgs
+     * @return number of rows that were deleted
+     */
     @Override
     public int delete(@NonNull Uri uri, @Nullable String selection, @Nullable String[] selectionArgs) {
         int rowsDeleted = 0;
@@ -159,6 +180,14 @@ public class DocInfoProvider extends ContentProvider {
         return rowsDeleted;
     }
 
+    /**
+     * Updates rows that match the selection criteria
+     * @param uri - uri
+     * @param values - values
+     * @param selection - selection
+     * @param selectionArgs - selectionArgs
+     * @return Number of rows that were updated
+     */
     @Override
     public int update(@NonNull Uri uri,
                       @Nullable ContentValues values,
@@ -168,7 +197,7 @@ public class DocInfoProvider extends ContentProvider {
 
         switch (sUriMatcher.match(uri)) {
             case DOC_INFO: {
-                //Inserts an entirely new row into the Job Info table
+                //Inserts an entirely new row into the Doc Info table
                 rowsUpdated = mOpenHelper.getWritableDatabase().update(
                         DocInfoContract.DocInfoListEntry.TABLE_NAME,
                         values,
@@ -179,8 +208,8 @@ public class DocInfoProvider extends ContentProvider {
 
             case DOC_INFO_WITH_NAME: {
                 //The last path segment has been confirmed as a string type, and assumed to be
-                //the jobs name. This can be used to return a cursor that contains the row
-                //from the table containing job info. Will be useful for EditJobActivity
+                //the doc name. This can be used to return a cursor that contains the row
+                //from the table containing doc info.
                 String[] docNameSelectionArg = {uri.getLastPathSegment()};
 
                 rowsUpdated = mOpenHelper.getReadableDatabase().update(

@@ -9,6 +9,7 @@ import androidx.loader.content.Loader;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.net.Uri;
@@ -29,7 +30,6 @@ import com.eldersoftware.pdfassist.utils.ProviderUtils;
 public class AllDocsActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor>,
         SimpleCardListAdapter.SimpleCardListClickHandler {
-    //Initialisation of RecyclerView components
     private RecyclerView mDocsRecyclerView;
     private SimpleCardListAdapter mAllDocsAdapter;
 
@@ -38,6 +38,7 @@ public class AllDocsActivity extends AppCompatActivity implements
             DocInfoContract.DocInfoListEntry.COLUMN_DOC_NAME,
     };
     public static final int INDEX_DOC_NAME = 0;
+
 
     private final String LOG_TAG = getClass().getSimpleName();
 
@@ -62,15 +63,19 @@ public class AllDocsActivity extends AppCompatActivity implements
 
         setTitle("All Docs");
 
+        //Initialises the loader for retrieving the doc information
         LoaderManager.getInstance(this).initLoader(DOC_LOADER_ID, null, this);
     }
 
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        //Inflates the menu
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_all_docs, menu);
         return true;
     }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -79,6 +84,7 @@ public class AllDocsActivity extends AppCompatActivity implements
                     new CreateEditDocDialog.SuccessCallback() {
                 @Override
                 public void success() {
+                    //Restarts loader if there is a new doc created
                     LoaderManager.getInstance(AllDocsActivity.this)
                             .restartLoader(DOC_LOADER_ID, null, AllDocsActivity.this);
                 }
@@ -87,6 +93,7 @@ public class AllDocsActivity extends AppCompatActivity implements
 
         return super.onOptionsItemSelected(item);
     }
+
 
     @NonNull
     @Override
@@ -109,50 +116,75 @@ public class AllDocsActivity extends AppCompatActivity implements
         }
     }
 
+
     @Override
     public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor data) {
         mAllDocsAdapter.swapCursor(data);
     }
 
+
     @Override
     public void onLoaderReset(@NonNull Loader<Cursor> loader) {
-
     }
 
+
+    /**
+     * ClickHandler from the SimpleCardListAdapter,
+     * called when the row is tapped (not the rows popup menu)
+     * @param docName - doc name
+     * @param view - view
+     */
     @Override
     public void onSimpleCardListTap(String docName, View view) {
-
+        //Starts the doc pages intent and passes the URI that will be used to retrieve page information
+        Intent docPagesIntent = new Intent(this, DocPagesActivity.class);
+        docPagesIntent.setData(
+                DocInfoContract.DocInfoListEntry.DOC_INFO_URI.buildUpon()
+                        .appendPath(docName).build());
+        startActivity(docPagesIntent);
     }
 
+
+    /**
+     * ClickHandler from the SimpleCardListAdapter,
+     * called when a rows popup menu is tapped
+     * @param menuItemId - menu item id, will either be edit or delete for a doc name
+     * @param docName - job name
+     */
     @Override
-    public void onSimpleCardListPopUpTap(int menuItemId, final String jobName) {
+    public void onSimpleCardListPopUpTap(int menuItemId, final String docName) {
         switch (menuItemId) {
             case R.id.action_simple_card_list_edit:
-                new CreateEditDocDialog(this, jobName,
+                //Dialog called to edit a doc name
+                new CreateEditDocDialog(this, docName,
                         new CreateEditDocDialog.SuccessCallback() {
                     @Override
                     public void success() {
                         LoaderManager.getInstance(AllDocsActivity.this)
-                                .restartLoader(DOC_LOADER_ID, null, AllDocsActivity.this);
+                                .restartLoader(DOC_LOADER_ID, null,
+                                        AllDocsActivity.this);
                     }
                 }).show();
                 break;
             case R.id.action_simple_card_list_delete:
                 YesNoDialog.showYesNoDialog(this,
                         "Delete Doc",
-                        "Are you sure you want to delete: " + jobName,
+                        "Are you sure you want to delete: " + docName,
                         new YesNoDialog.YesNoDialogCallback() {
                             @Override
                             public void yesNoCallback(boolean yesSelected) {
-                                if (ProviderUtils.deleteDoc(jobName, AllDocsActivity.this)) {
+                                //Attempts to remove the respective row from the database
+                                //Shows a toast message for a success/error
+                                if (ProviderUtils.deleteDoc(docName, AllDocsActivity.this)) {
                                     Toast.makeText(AllDocsActivity.this,
-                                            "Deleted: " + jobName, Toast.LENGTH_LONG).show();
+                                            "Deleted: " + docName, Toast.LENGTH_LONG).show();
                                     LoaderManager.getInstance(AllDocsActivity.this)
                                             .restartLoader(DOC_LOADER_ID, null,
                                                     AllDocsActivity.this);
                                 } else {
                                     Toast.makeText(AllDocsActivity.this,
-                                            "Failed to delete: " + jobName, Toast.LENGTH_LONG).show();
+                                            "Failed to delete: " + docName, Toast.LENGTH_LONG)
+                                            .show();
                                 }
                             }
                         });
