@@ -10,8 +10,11 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.eldersoftware.pdfassist.R;
 import com.eldersoftware.pdfassist.utils.ProviderUtils;
 
@@ -28,13 +31,13 @@ public class TitleImageTextAdapter extends
     String[] mPageImageData;
     String[] mPageTextData;
 
-
     //Interface click handler used for tapping on either the title, image, text or popup menu
     public interface TitleImageTextClickHandler {
         void onTitleTap(int position);
         void onImageTap(int position);
         void onTextTap(int position);
         void onPopUpMenuTap(int menuItemId, String pageName);
+        void onDeleteTap(int position);
     }
 
 
@@ -82,10 +85,23 @@ public class TitleImageTextAdapter extends
     @Override
     public void onBindViewHolder(@NonNull TitleImageTextAdapter.TitleImageTextViewHolder holder,
                                  int position) {
-        holder.mPageNum.setText(String.valueOf(position + 1));
         holder.mPageNameTextView.setText(mPageNameData[position]);
-//        holder.mPageNameTextView.setText(mPageNameData[position]);
-//        holder.mPageNameTextView.setText(mPageNameData[position]);
+
+        if (mPageImageData[position] != null && !mPageImageData[position].equals("null") &&
+                !mPageImageData[position].isEmpty()) {
+//            holder.mPageImage.setBackgroundColor(R.color.cardview_shadow_end_color);
+            RequestOptions options = new RequestOptions();
+            options = options.fitCenter();
+
+            Glide.with(mContext)
+                    .load(mPageImageData[position])
+                    .apply(options)
+                    .into(holder.mPageImage);
+        }
+
+        if (!mPageTextData[position].equals(ProviderUtils.PROVIDER_NULL)) {
+            holder.mPageText.setText(mPageTextData[position]);
+        }
     }
 
     /**
@@ -123,40 +139,52 @@ public class TitleImageTextAdapter extends
         TextView mPageNameTextView;
         ImageView mPageImage;
         TextView mPageText;
-        TextView mPagePopUpMenu;
+        ImageView mPageDelete;
 
 
         public TitleImageTextViewHolder(final View viewParent) {
             super(viewParent);
-            mPageNum = viewParent.findViewById(R.id.tv_adapter_num);
+//            mPageNum = viewParent.findViewById(R.id.tv_adapter_num);
             mPageNameTextView = viewParent.findViewById(R.id.tv_adapter_title);
             mPageImage = viewParent.findViewById(R.id.iv_adapter_image);
             mPageText = viewParent.findViewById(R.id.tv_adapter_info);
-            mPagePopUpMenu = viewParent.findViewById(R.id.tv_adapter_item_popup);
+//            mPagePopUpMenu = viewParent.findViewById(R.id.tv_adapter_item_popup);
+            mPageDelete = viewParent.findViewById(R.id.iv_adapter_delete);
 
-            mPagePopUpMenu.setOnClickListener(new View.OnClickListener() {
+
+            //OnClick for deleting a page
+            mPageDelete.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View view) {
-                    //Creating a popup menu
-                    PopupMenu popup = new PopupMenu(mContext, mPagePopUpMenu);
-
-                    //Inflating menu from xml resource
-                    popup.inflate(R.menu.menu_simple_card_popup);
-
-                    //Adding click listener
-                    popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                        @Override
-                        public boolean onMenuItemClick(MenuItem item) {
-                            mClickHandler.onPopUpMenuTap(item.getItemId(),
-                                    mPageNameTextView.getText().toString());
-                            return true;
-                        }
-                    });
-
-                    //Displaying the popup
-                    popup.show();
+                public void onClick(View v) {
+                    mClickHandler.onDeleteTap(getAdapterPosition());
                 }
             });
+
+
+//            mPagePopUpMenu.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View view) {
+//                    //Creating a popup menu
+//                    PopupMenu popup = new PopupMenu(mContext, mPagePopUpMenu);
+//
+//                    //Inflating menu from xml resource
+//                    popup.inflate(R.menu.menu_simple_card_popup);
+//
+//                    //Adding click listener
+//                    popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+//                        @Override
+//                        public boolean onMenuItemClick(MenuItem item) {
+//                            mClickHandler.onPopUpMenuTap(item.getItemId(),
+//                                    mPageNameTextView.getText().toString());
+//                            return true;
+//                        }
+//                    });
+//
+//                    //Displaying the popup
+//                    popup.show();
+//                }
+//            });
+
 
             //OnClick for changing a pages title
             mPageNameTextView.setOnClickListener(new View.OnClickListener() {

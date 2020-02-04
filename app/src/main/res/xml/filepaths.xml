@@ -1,0 +1,8 @@
+<paths>
+    <external-path
+        name="mediaimages"
+        path="."/>
+    <root-path
+        name="external_files"
+        path="." />
+</paths>
